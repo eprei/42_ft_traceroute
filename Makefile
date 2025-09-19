@@ -1,6 +1,6 @@
 NAME = ft_traceroute
 
-SRCS = src/main.c src/traceroute.c src/parsing.c src/signal_handler.c src/rtt.c src/net_utils.c src/error.c src/print.c src/time.c src/packet_utils.c
+SRCS = src/main.c src/traceroute.c src/parsing.c src/signal_handler.c src/net_utils.c src/error.c src/print.c src/time.c src/packet_utils.c src/libft.c
 OBJ = $(SRCS:.c=.o)
 
 CC = gcc

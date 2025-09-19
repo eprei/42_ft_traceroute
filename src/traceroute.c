@@ -14,28 +14,6 @@ void clear_sock_buffer(const int socket_fd)
     while (recvfrom(socket_fd, dummy, sizeof(dummy), MSG_DONTWAIT, NULL, NULL) > 0){}
 }
 
-void print_unreachable(const bool destination_unreachable, const struct icmphdr* icmp_hdr)
-{
-    char c[3];
-
-    if (destination_unreachable){
-        switch (icmp_hdr->code){
-        case ICMP_HOST_UNREACH:
-            strcpy(c, "!H");
-            break;
-        case ICMP_NET_UNREACH:
-            strcpy(c, "!N");
-            break;
-        case ICMP_PROT_UNREACH:
-            strcpy(c, "!P");
-            break;
-        default:
-            break;
-        }
-        printf(" %s", c);
-    }
-}
-
 void loop(t_traceroute *traceroute) {
     int ttl = 1;
     int msg_count = 0, addr_len;
@@ -71,9 +49,9 @@ void loop(t_traceroute *traceroute) {
             }
 
             // Receive packet
-            memset(recv_buffer, 0, sizeof(recv_buffer));
+            ft_memset(recv_buffer, 0, sizeof(recv_buffer));
             addr_len = (int) sizeof(recv_addr);
-            memset(&recv_addr, 0, sizeof(recv_addr));
+            ft_memset(&recv_addr, 0, sizeof(recv_addr));
 
             size_t bytes_received = recvfrom(traceroute->socket_fd, recv_buffer, sizeof(recv_buffer), 0, (struct sockaddr*)&recv_addr, (socklen_t *) &addr_len);
             if (bytes_received == (size_t) -1) {
@@ -90,7 +68,6 @@ void loop(t_traceroute *traceroute) {
                     const struct iphdr *ip_hdr = (struct iphdr *)recv_buffer;
                     const struct icmphdr *icmp_hdr = (struct icmphdr *)(recv_buffer + ip_hdr->ihl * 4); // offset by ip header length
                     bool to_print = false;
-
 
                      if (is_localhost) {
                         const long double rtt = get_elapsed_time_ms(&time_start_packet);
@@ -119,11 +96,10 @@ void loop(t_traceroute *traceroute) {
 
                         if (to_print){
                             const long double rtt = get_elapsed_time_ms(&time_start_packet);
-                            process_rtt(&traceroute->rtt_list, rtt);
                             if (i == 0) {
                                 printf("  %s", sender_ip);
                             }
-                            printf("  %.3Lfms", get_last_rtt(traceroute->rtt_list));
+                            printf("  %.3Lfms", rtt);
                             print_unreachable(destination_unreachable, icmp_hdr);
                             i++;
                         }

@@ -6,7 +6,7 @@ bool parsing(const int argc, char **argv, t_traceroute *ping) {
         return false;
     }
 
-    if (strncmp("--help", argv[1], strlen("--help")) == 0) {
+    if (ft_strncmp("--help", argv[1], strlen("--help")) == 0) {
         print_usage();
         return false;
     }

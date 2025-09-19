@@ -13,7 +13,7 @@ bool convert_address(t_traceroute *ping) {
         return false;
     }
 
-    strcpy(ping->ip, ping->destination_host);
+    ft_strncpy(ping->ip, ping->destination_host, 15);
     return true;
 }
 
@@ -25,7 +25,7 @@ bool dns_lookup(t_traceroute *ping) {
         return false;
     }
 
-    strcpy(ping->ip, inet_ntoa(*(struct in_addr *)host_entity->h_addr));
+    ft_strncpy(ping->ip, inet_ntoa(*(struct in_addr *)host_entity->h_addr), 15);
     ping->sa.sin_family = host_entity->h_addrtype;
     ping->sa.sin_addr = *(struct in_addr *)host_entity->h_addr;
 

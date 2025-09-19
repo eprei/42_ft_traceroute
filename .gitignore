@@ -2,3 +2,5 @@
 .idea
 .vagrant
 *.pdf
+*.o
+ft_traceroute
