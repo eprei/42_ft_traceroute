@@ -1,8 +1,9 @@
 #include "traceroute.h"
+// TODO testcases google.com 8.8.8.8 localhost 10.0.2.254 --help
 
 int ft_traceroute(t_traceroute *ping) {
     if (convert_address(ping) || dns_lookup(ping)){
-          loop(ping);
+        loop(ping);
         return 0;
     }
     return 1;
@@ -25,6 +26,7 @@ void loop(t_traceroute *traceroute) {
     bool destination_unreachable = false;
     const bool is_localhost = traceroute->sa.sin_addr.s_addr == htonl(INADDR_LOOPBACK);
 
+    // TODO use gettimeofday instead clock
     set_timeout(traceroute);
     print_first_line(traceroute);
 

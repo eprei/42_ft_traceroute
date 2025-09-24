@@ -63,3 +63,23 @@ void *ft_memset(void *b, const int c, size_t len)
 	}
 	return b;
 }
+
+void	*ft_memcpy(void *dest, const void *src, size_t n)
+{
+	unsigned char* ptr1 = dest;
+	unsigned char* ptr2 = (unsigned char*)src;
+
+	if (src == NULL && dest == NULL){
+		return NULL;
+	}
+
+	while (n > 0)
+	{
+		*ptr1 = *ptr2;
+		ptr1++;
+		ptr2++;
+		n--;
+	}
+
+	return dest;
+}
