@@ -8,6 +8,7 @@
 # include <ctype.h>
 # include <sys/socket.h>
 # include <time.h>
+# include <sys/time.h>
 # include <netdb.h>
 # include <sys/socket.h>
 # include <netinet/in.h>
@@ -75,7 +76,7 @@ void fill_packet(int *msg_count, struct ping_pkt *packet, const unsigned short *
 void exit_error(char *str);
 void set_timeout(const t_traceroute *traceroute);
 void print_first_line(t_traceroute* ping);
-long double get_elapsed_time_ms(const struct timespec *time_start);
+long double get_elapsed_time_ms(const struct timeval *start_time) ;
 size_t	ft_strlen(const char *s);
 int	ft_strncmp(const char *s1, const char *s2, size_t n);
 size_t	ft_strncpy(char *dest, const char *src, size_t n);

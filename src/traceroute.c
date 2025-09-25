@@ -1,6 +1,4 @@
 #include "traceroute.h"
-// TODO testcases google.com 8.8.8.8 localhost 10.0.2.254 --help
-
 int ft_traceroute(t_traceroute *ping) {
     if (convert_address(ping) || dns_lookup(ping)){
         loop(ping);
@@ -21,12 +19,10 @@ void loop(t_traceroute *traceroute) {
     char recv_buffer[RECV_BUFFER_SIZE];
     struct ping_pkt packet;
     struct sockaddr_in recv_addr;
-    struct timespec time_start_packet;
     bool destination_reached = false;
     bool destination_unreachable = false;
     const bool is_localhost = traceroute->sa.sin_addr.s_addr == htonl(INADDR_LOOPBACK);
 
-    // TODO use gettimeofday instead clock
     set_timeout(traceroute);
     print_first_line(traceroute);
 
@@ -40,11 +36,14 @@ void loop(t_traceroute *traceroute) {
         printf("%3d", ttl);
         int i = 0;
         while (i < PROBES_PER_HOP){
-            clear_sock_buffer(traceroute->socket_fd);
+            struct timeval start_time;
             unsigned short id = (unsigned short) (getpid() + ttl + i);
-            fill_packet(&msg_count, &packet, &id);
             bool packet_sent = true;
-            clock_gettime(CLOCK_MONOTONIC, &time_start_packet);
+
+            clear_sock_buffer(traceroute->socket_fd);
+            fill_packet(&msg_count, &packet, &id);
+            gettimeofday(&start_time, NULL);
+
             if (sendto(traceroute->socket_fd, &packet, sizeof(packet), 0, (struct sockaddr*)&traceroute->sa, sizeof(traceroute->sa)) <= 0) {
                 // fprintf(stderr, "Packet Sending Failed!\n");
                 packet_sent = false;
@@ -55,11 +54,14 @@ void loop(t_traceroute *traceroute) {
             addr_len = (int) sizeof(recv_addr);
             ft_memset(&recv_addr, 0, sizeof(recv_addr));
 
-            size_t bytes_received = recvfrom(traceroute->socket_fd, recv_buffer, sizeof(recv_buffer), 0, (struct sockaddr*)&recv_addr, (socklen_t *) &addr_len);
+            const size_t bytes_received = recvfrom(traceroute->socket_fd, recv_buffer, sizeof(recv_buffer), 0, (struct sockaddr*)&recv_addr, (socklen_t *) &addr_len);
+            long double rtt = get_elapsed_time_ms(&start_time);
+            rtt = rtt != -1 ? rtt : 42.42;
+
             if (bytes_received == (size_t) -1) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {
                     printf("  *");
-                    fflush(stdout);
+                    // fflush(stdout);
                     i++;
                 } else {
                     // fprintf(stderr, "Packet receive failed!\n");
@@ -69,10 +71,8 @@ void loop(t_traceroute *traceroute) {
                     char *sender_ip = inet_ntoa(recv_addr.sin_addr);
                     const struct iphdr *ip_hdr = (struct iphdr *)recv_buffer;
                     const struct icmphdr *icmp_hdr = (struct icmphdr *)(recv_buffer + ip_hdr->ihl * 4); // offset by ip header length
-                    bool to_print = false;
 
-                     if (is_localhost) {
-                        const long double rtt = get_elapsed_time_ms(&time_start_packet);
+                    if (is_localhost) {
                         if (i == 0) {
                             printf("  %s", sender_ip);
                         }
@@ -80,6 +80,8 @@ void loop(t_traceroute *traceroute) {
                         destination_reached = true;
                       i++;
                     } else {
+                        bool to_print = false;
+
                         if (icmp_hdr->type == ICMP_TIME_EXCEEDED ){
                             const struct iphdr *original_ip = (struct iphdr *)((char *)icmp_hdr + 8);
                             const struct icmphdr *original_icmp = (struct icmphdr *)((char *)original_ip + original_ip->ihl * 4);
@@ -97,7 +99,6 @@ void loop(t_traceroute *traceroute) {
                         }
 
                         if (to_print){
-                            const long double rtt = get_elapsed_time_ms(&time_start_packet);
                             if (i == 0) {
                                 printf("  %s", sender_ip);
                             }

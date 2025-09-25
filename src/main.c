@@ -1,8 +1,8 @@
 #include "traceroute.h"
 
-int main(const int argc, char **argv) {
+// test args google.com 8.8.8.8 localhost 10.0.2.254 --help
 
-    signal(SIGINT, signal_handler);
+int main(const int argc, char **argv) {
 
     t_traceroute traceroute = {0};
     init_struct(&traceroute, argv[0]);
